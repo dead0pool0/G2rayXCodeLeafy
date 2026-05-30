@@ -38,5 +38,4 @@ RUN set -eux; \
     && setcap 'cap_net_bind_service=+ep' /usr/local/bin/xray \
     && rm -rf /tmp/xray.zip /tmp/xray-dir
 
-# VLESS inbound (443) and subscription server (8080)
 EXPOSE 443 8080
