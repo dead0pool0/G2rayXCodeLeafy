@@ -1,36 +1,48 @@
 {
-  "name": "G2ray-Codespace",
+  "name": "G2Leafy",
   "build": {
     "dockerfile": "Dockerfile",
-    "context": "."
+    "context": ".."
   },
-  "features": {
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "installZsh": false
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {
-      "version": "latest"
-    }
-  },
-  "postStartCommand": "bash ./g2ray.sh --silent-start",
-  "postAttachCommand": "bash ./g2ray.sh",
+
+  // Keep the container alive after build so the panel can be launched.
+  "overrideCommand": true,
+
+  "remoteUser": "root",
+
+  // VLESS inbound + subscription HTTP server, both public for clients.
+  "forwardPorts": [443, 8080],
   "portsAttributes": {
     "443": {
-      "label": "g2ray-vless",
-      "protocol": "http",
-      "onAutoForward": "silent",
-      "visibility": "public"
+      "label": "VLESS (xray)",
+      "visibility": "public",
+      "onAutoForward": "silent"
+    },
+    "8080": {
+      "label": "Subscription",
+      "visibility": "public",
+      "onAutoForward": "silent"
     }
   },
-  "forwardPorts": [443],
-  "hostRequirements": {
-    "cpus": 2
+
+  "containerEnv": {
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "TERM": "xterm-256color"
   },
+
   "customizations": {
     "vscode": {
+      "extensions": ["ms-python.python"],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash"
       }
     }
-  }
+  },
+
+  // Make sure gh has the scope it needs to flip port visibility / keepalive.
+  "postCreateCommand": "gh auth status || true",
+
+  // Auto-launch the panel in the integrated terminal on attach.
+  "postAttachCommand": "python3 g2leafy.py"
 }
